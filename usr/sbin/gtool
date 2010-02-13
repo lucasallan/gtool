@@ -1,0 +1,266 @@
+#!/bin/bash
+#
+# Gtool - The Simple tool for Slackware
+# Copyright (C) 2007 Lucas Allan Cardoso
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# http://gtool.sourceforge.net
+# Lucas Allan a.k.a Shaman286
+# lucas.allan@gmail.com
+#
+
+#variables:
+arq_filelist="/etc/gtool/list"
+conf="/etc/gtool/gtool.conf"
+arq_md5="/etc/gtool/md5"
+arq_packages="/etc/gtool/packages"
+work="/usr/gtool/packages/"
+package=`echo "$2"`
+search_pack=`echo "$2"`
+version="0.06"
+name="Get Tool"
+mirrors=`cat "$conf"|grep "mirror="|sed '/#/d'|sed '/^$/d'|sed 's/mirror=//g'`
+
+#functions
+upgrade()
+{
+if [ -e "$arq_filelist" ]; then
+	if [ -f "$search_pac" ]; then
+		echo ""
+		echo "It specifies the package"
+		echo ""
+	else
+		packa=`cat $arq_filelist|grep "$package"` 2> /dev/null
+		link_download=`echo "$mirrors""$packa"` 2> /dev/null
+		if [ -z "$packa" ];then
+			echo ""
+			echo "Package not found"
+			echo ""
+		else
+			pac=`echo "$link_download"|rev|cut -f1 -d"/"|rev`
+			buceta=`echo "$link_download"|wc -l`
+			if [ $buceta -gt 2 ]; then
+				echo "$pac"
+				echo ""
+				echo "Many packages had been found - Search Makes more specifies"
+				echo ""
+				exit
+			else
+				wget -c "$link_download" -O "$work""$pac"
+				md5=`md5sum "$work""$pac"|awk '{print $1}'`
+				mda=`cat $arq_md5|grep "$pac"|grep .tgz|awk '{print $1}'`
+				echo "Checking md5"
+					if [ "$md5" == "$mda" ]; then
+     			 		  	echo "Download Sucess"
+						upgradepkg "$work""$pac"
+              				  else
+        					echo "Package corrupted... try again"s
+						rm -f "$work""$pac" 2> /dev/null
+					fi		
+
+			fi
+		fi
+	fi
+	else
+	echo ""
+	echo "Upgrade the list of archive before continuing: $0 -u"
+	echo ""
+fi
+}
+update()
+{
+	#delete old files
+	rm "$arq_filelist" 2> /dev/null
+	rm "$md5" 2> /dev/null
+	rm "$arq_packages" 2> /dev/null
+	#download filelist and md5
+	wget -c "$mirrors""FILELIST.TXT" -O /tmp/filelist
+	wget -c "$mirrors""CHECKSUMS.md5" -O /tmp/md
+	#formating the lists and add mirror url
+	echo "Formating the lists..."
+	cat /tmp/filelist|grep .tgz|awk '{print $8}'|sed 's/\(\.\)\(.*\)/\2/'|sed '/.asc/d' > /etc/gtool/list
+	#formating lists 
+	cat /tmp/filelist|grep .tgz|awk '{print $8}'|sed 's/\(\.\)\(.*\)/\2/'|sed '/.asc/d'|sed "s/\/\(.*\)\/\(.*\)/\2/" > /etc/gtool/packages
+	cat /tmp/md|sed '/.asc/d'|grep .tgz > /etc/gtool/md5
+	echo "Complete!"
+	#clear temp files
+	rm /tmp/filelist 2> /dev/null
+	rm /tmp/md 2> /dev/null
+}
+
+
+
+instap()
+{
+if [ -e "$arq_filelist" ]; then
+	if [ -f "$search_pac" ]; then
+		echo ""
+		echo "It specifies the package"
+		echo ""
+	else
+		packa=`cat $arq_filelist|grep "$package"` 2> /dev/null
+		link_download=`echo "$mirrors""$packa"` 2> /dev/null
+		if [ -z "$packa" ];then
+			echo ""
+			echo "Package not found"
+			echo ""
+		else
+			pac=`echo "$link_download"|rev|cut -f1 -d"/"|rev`
+			buceta=`echo "$link_download"|wc -l`
+			if [ $buceta -gt 2 ]; then
+				echo "$pac"
+				echo ""
+				echo "Many packages had been found - Search Makes more specifies"
+				echo ""
+				exit
+			else
+				wget -c "$link_download" -O "$work""$pac"
+				md5=`md5sum "$work""$pac"|awk '{print $1}'`
+				mda=`cat $arq_md5|grep "$pac"|grep .tgz|awk '{print $1}'`
+				echo "Checking md5"
+					if [ "$md5" == "$mda" ]; then
+     			 		  	echo "Download Sucess"
+						installpkg "$work""$pac"
+              				  else
+        					echo "Package corrupted... try again"s
+						rm -f "$work""$pac" 2> /dev/null
+					fi		
+
+			fi
+		fi
+	fi
+	else
+	echo ""
+	echo "Upgrade the list of archive before continuing: $0 -u"
+	echo ""
+fi
+}
+
+search(){
+	if [ -e "$arq_filelist" ]; then
+		if [ -f "$search_pac" ]; then
+			echo ""
+			echo "It specifies the package"
+			echo ""
+		else
+			package_search=`cat $arq_packages|grep "$package"` 2> /dev/null
+			if [ -z "$package_search" ];then
+				echo ""
+				echo "Package not found"
+			else
+				echo ""
+				echo "Found!"
+				echo "$package_search"
+			fi
+		fi
+	else
+		echo ""	
+		echo "Upgrade the list of archive before continuing: $0 -u"
+		echo ""
+	fi
+
+}
+
+download()
+{
+if [ -e "$arq_filelist" ]; then
+	if [ -f "$search_pac" ]; then
+		echo ""
+		echo "It specifies the package"
+		echo ""
+	else
+		packa=`cat $arq_filelist|grep "$package"` 2> /dev/null
+		link_download=`echo "$mirrors""$packa"` 2> /dev/null
+		if [ -z "$packa" ];then
+			echo ""
+			echo "Package not found"
+		else
+			pac=`echo "$link_download"|rev|cut -f1 -d"/"|rev`
+			buceta=`echo "$link_download"|wc -l`
+			if [ $buceta -gt 2 ]; then
+				echo "$pac"
+				echo ""
+				echo "Many packages had been found - Search Makes more specifies"
+				echo ""
+				exit
+			else
+				wget -c "$link_download" -O "$work""$pac"
+				md5=`md5sum "$work""$pac"|awk '{print $1}'`
+				mda=`echo "$arq_md5"|grep "$pac"|grep .tgz|awk '{print $1}'`
+				echo "Checking md5"
+					if [ "$md5" == "$mda" ]; then
+     			 		  	echo "Download Sucess"
+						echo "$work""$pac"
+              				  else
+        					echo "Package corrupted... try again"s
+						rm -f "$work""$pac" 2> /dev/null
+					fi		
+
+			fi
+		fi
+	fi
+	else
+	echo ""
+	echo "Upgrade the list of archive before continuing: $0 -u"
+	echo ""
+fi
+}
+
+credits(){
+
+echo ""
+echo "$name $version"
+echo "http://gtool.sourceforge.net"
+echo "Devel: Lucas Allan"
+echo ""
+
+}
+
+menu(){
+echo ""
+echo "$name $version"
+echo ""
+echo "http://gtool.sourceforge.net"
+echo ""
+[ "$2" ] || echo "Use: $0 <Option> <Package> 
+
+-s | search	(Search Package)
+-i | install 	(Install/Reinstall Package) 
+-u | upgrade	(Upgrade Package)
+-d | download	(Just Download)
+-U | update 	(Update List)
+-C | credits	(Show credits)
+
+
+"
+}
+
+case "$1" in
+
+	search) search;;
+	install) instap;;
+	upgrade) upgrade;;
+	download) download;;
+	update) update;;
+	credits) credits;;
+	-C) credits;;
+	-s) search;;
+	-i) instap;;
+	-u) upgrade;;
+	-d) download;;
+	-U) update;;
+	*) menu;;
+esac
