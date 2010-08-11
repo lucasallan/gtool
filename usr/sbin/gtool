@@ -51,8 +51,8 @@ if [ -e "$arq_filelist" ]; then
 			echo ""
 		else
 			pac=`echo "$link_download"|rev|cut -f1 -d"/"|rev`
-			buceta=`echo "$link_download"|wc -l`
-			if [ $buceta -gt 2 ]; then
+			bc=`echo "$link_download"|wc -l`
+			if [ $bc -gt 2 ]; then
 				echo "$pac"
 				echo ""
 				echo "Many packages had been found - Search Makes more specifies"
@@ -119,8 +119,8 @@ if [ -e "$arq_filelist" ]; then
 			echo ""
 		else
 			pac=`echo "$link_download"|rev|cut -f1 -d"/"|rev`
-			buceta=`echo "$link_download"|wc -l`
-			if [ $buceta -gt 2 ]; then
+			bc=`echo "$link_download"|wc -l`
+			if [ $bc -gt 2 ]; then
 				echo "$pac"
 				echo ""
 				echo "Many packages had been found - Search Makes more specifies"
@@ -189,8 +189,8 @@ if [ -e "$arq_filelist" ]; then
 			echo "Package not found"
 		else
 			pac=`echo "$link_download"|rev|cut -f1 -d"/"|rev`
-			buceta=`echo "$link_download"|wc -l`
-			if [ $buceta -gt 2 ]; then
+			bc=`echo "$link_download"|wc -l`
+			if [ $bc -gt 2 ]; then
 				echo "$pac"
 				echo ""
 				echo "Many packages had been found - Search Makes more specifies"
